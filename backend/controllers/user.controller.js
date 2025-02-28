@@ -1,6 +1,8 @@
-import {body, validationResult} from "express-validator";
+import { validationResult } from "express-validator";
 import User from "../models/user.model.js";
-import bcrypt from "bcrypt";
+import Post from "../models/post.model.js";
+
+import bcrypt from "bcryptjs";  
 import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
 
@@ -39,13 +41,13 @@ export const login=async(req,res)=>{
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
-        const user=await User.findOne({email});
+        const user=await User.findOne({email}).select('+password');
         if(!user){
             return res.status(400).json({message:"Invalid email or password",
                 success:false
             });
         }
-        user = {
+        const userData = {
             _id: user._id,
             username: user.username,
             email: user.email,
@@ -53,8 +55,9 @@ export const login=async(req,res)=>{
             bio: user.bio,
             followers: user.followers,
             following: user.following,
-            posts: populatedPosts
+            posts: user.posts
         }
+        // console.log(user)
         const isMatch=await bcrypt.compare(password,user.password);
         if(!isMatch){
             return res.status(400).json({message:"Invalid email or password",
@@ -64,18 +67,29 @@ export const login=async(req,res)=>{
         const token=jwt.sign({userId:user._id},process.env.JWT_SECRET,{expiresIn:"1d"});
         return res.cookie('token',token,{httpOnly:true,sameSite:'strict',maxAge:1*24*60*60*1000}).json({message:`Welcome ${user.username}`,
             success:true,
-            user
+            user:userData
         });
 
     }catch(err){
         console.log(err);
-        res.status(500).json({message: "Internal Server Error"});
+        res.status(500).json({message: "Internal Server Error",
+            success:false,
+            error:err.message
+        });
     }
 
 }
 
 export const logout = async (req, res) => {
     try {
+        const token=req.cookies?.token;
+        if (!token) {
+            return res.status(400).json({ 
+                message: "No token found, user already logged out.",
+                success: false 
+            });
+        }
+
         res.clearCookie("token", {
             httpOnly: true,
             sameSite: "strict",
@@ -89,35 +103,45 @@ export const logout = async (req, res) => {
     } catch (error) {
         console.error("Logout Error:", error);
         return res.status(500).json({ message: "Internal Server Error",
-            success: false
+            success: false,
+            error: error.message
         }
         );
     }
 };
 
-export const getUser=async(req,res)=>{
-    try {
-        const userId=req.params.id;
-        const user=await User.findById(userId).populate({path:'posts',options:{sort:{createdAt:-1}}}).find({path:'bookmarks',options:{sort:{createdAt:-1}}});
 
-        if(!user){
-            return res.status(404).json({message:"User not found",
-                success:false
+export const getUser = async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        const user = await User.findById(userId)
+            .populate({ path: 'posts', options: { sort: { createdAt: -1 } } }) 
+            .populate({ path: 'bookmarks', options: { sort: { createdAt: -1 } } });
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+                success: false
             });
         }
+
+        
         return res.status(200).json({
-            user:user,
-            success:true
+            user: user,
+            success: true
         });
+
     } catch (error) {
         console.log(error);
-        return res.status(500).json({message: "Internal Server Error",
-            success:false
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false,
+            error: error.message
         });
-        
     }
+};
 
-}
 
 export const editProfile=async (req,res)=>{
     try{
@@ -210,7 +234,7 @@ export const followOrUnfollowUser=async(req,res)=>{
             });
         }else{
             await Promise.all([
-                User.upadateOne({_id:reqSender},{$push:{following:reqReciever}}),
+                User.updateOne({_id:reqSender},{$push:{following:reqReciever}}),
                 User.updateOne({_id:reqReciever},{$push:{followers:reqSender}})
             ]);
             return res.status(200).json({message:"Followed successfully",
@@ -221,7 +245,8 @@ export const followOrUnfollowUser=async(req,res)=>{
     } catch (error) {
         console.log(error);
         return res.status(500).json({message: "Internal Server Error",
-            success:false   
+            success:false  ,
+            error:error.message
         });
     }
 }

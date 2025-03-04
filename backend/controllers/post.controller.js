@@ -2,6 +2,7 @@ import sharp from "sharp";
 import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
 import cloudinary from "../utils/cloudinary.js";
+import { Comment } from "../models/comment.model.js";
 
 export const createPost=async(req,res)=>{
     try {
@@ -50,11 +51,155 @@ export const getAllPosts=async(req,res)=>{
     try {
         const posts=await Post.find().sort({createdAt:-1})
         .populate({path:'author',select:'username,proflePicture'})
-        .populate({path:'likes',createdAt:-1})
-        .populate({path:'comments',options:{sort:{createdAt:-1}}});
+      
+        .populate({path:'comments',options:{sort:{createdAt:-1}},populate:{path:'author',select:'username,profilePicture'}});
         return res.status(200).json({
             posts:posts,
             success:true
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false,
+            error: error.message   
+        });
+    }
+}
+
+export const getUserPosts=async(req,res)=>{
+    try {
+      const authorId=req.id;
+      const user=await Post.find({author:authorId}).sort({createdAt:-1}).populate({path:'author',select:'username,profilePicture'})
+      .populate({path:'comments',options:{sort:{createdAt:-1}},populate:{path:'author',select:'username,profilePicture'}});
+
+        return res.status(200).json({
+            posts:user,
+            success:true
+        }); 
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false,
+            error: error.message   
+        });
+    }
+}
+
+export const likePost=async(req,res)=>{
+    try {
+        const postId=req.params.id;
+        const userId=req.id;
+        const post=await Post.findById(postId);
+        if(!post){
+            return res.status(404).json({
+                message:"Post not found",
+                success:false
+            });
+        }
+        await post.updateOne({$addToSet:
+            {likes:userId}
+        })
+        post.save();
+        return res.status(200).json({
+            message:"Post liked",
+            success:true
+        });
+
+        
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false,
+            error: error.message   
+        });
+    }
+}
+
+export const unlikePost=async(req,res)=>{
+    try {
+        const postId=req.params.id;
+        const userId=req.id;
+        const post=await Post.findById(postId);
+        if(!post){
+            return res.status(404).json({
+                message:"Post not found",
+                success:false
+            });
+        }
+        await post.updateOne({$pull:{likes:userId}});
+        post.save();
+        return res.status(200).json({
+            message:"Post unliked",
+            success:true
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false,
+            error: error.message   
+        });
+    }
+}
+
+export const addComments=async(req,res)=>{
+    try {
+        const userId=req.id;
+        const postId=req.params.id;
+        const post=await Post.findById(postId);
+        if(!post){
+            return res.status(404).json({
+                message:"Post not found",
+                success:false
+            });
+        }
+        const {content}=req.body;
+        if(!content){
+            return res.status(400).json({
+                message:"Comment is required",
+                success:false
+            });
+        }
+        const comment=await Comment.create({
+            text:content,
+            author:userId,
+            post:postId
+        }).populate({path:'author',select:'username,profilePicture'});
+        post.comments.push(comment._id);
+        post.save();
+        return res.status(201).json({
+            comment:comment,
+            success:true});
+
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false,
+            error: error.message   
+        });
+    }
+}
+
+export const getCommentsOfPost=async(req,res)=>{
+    try {
+        const postId=req.params.id;
+        const comments=await Comment.find({post:postId}).sort({createdAt:-1}.populate({path:'author',select:'username,profilePicture'}));
+        if(!comments){
+            return res.status(404).json({
+                message:"Comments not found",
+                success:false
+            });
+        }
+        return res.status(200).json({
+            comments:comments,
+            success:true    
         });
 
     } catch (error) {

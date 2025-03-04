@@ -211,3 +211,88 @@ export const getCommentsOfPost=async(req,res)=>{
         });
     }
 }
+
+export const deletePost=async(req,res)=>{
+    try {
+        const postId=req.params.id;
+        const userId=req.id;
+        const post=await Post.findById(postId);
+        if(!post){
+            return res.status(404).json({
+                message:"Post not found",
+                success:false
+            });
+        }
+        if(post.author.toString()!==userId){
+            return res.status(401).json({
+                message:"You are not authorized to delete this post",
+                success:false
+            });
+        }
+        await post.findByIdAndDelete(postId );
+        const user=await User.findById(userId);
+        if(user){
+            user.posts.pull(postId);
+            user.save();
+        }
+        await Comment.deleteMany({post:postId});
+
+        return res.status(200).json({
+            message:"Post deleted",
+            success:true
+        });     
+       
+        
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false,
+            error: error.message   
+        }); 
+    }
+}
+
+export const bookmarkPost=async(req,res)=>{
+    try{
+        const postId=req.params.id;
+        const userId=req.id;
+        const post=await Post.findById(postId);
+        if(!post){
+            return res.status(404).json({
+                message:"Post not found",
+                success:false
+            });
+        }
+        const user=await User.findById(userId);
+        if(!user){
+            return res.status(404).json({
+                message:"User not found",
+                success:false
+            });
+        }
+        if(user.bookmarks.includes(postId)){
+            await user.updateOne({$pull:{bookmarks:postId}});
+            user.save();
+            return res.status(200).json({
+                message:"Post unbookmarked",
+                success:true
+            });
+        }else{
+            await user.updateOne({$addToSet:{bookmarks:postId}});
+            user.save();
+            return res.status(200).json({
+                message:"Post bookmarked",
+                success:true
+            });
+        }
+        
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false,
+            error: error.message   
+        }); 
+    }
+}

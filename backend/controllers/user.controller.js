@@ -47,6 +47,15 @@ export const login=async(req,res)=>{
                 success:false
             });
         }
+        const populatedPosts = await Promise.all(
+            user.posts.map( async (postId) => {
+                const post = await Post.findById(postId);
+                if(post.author.equals(user._id)){
+                    return post;
+                }
+                return null;
+            })
+        )
         const userData = {
             _id: user._id,
             username: user.username,
@@ -55,9 +64,8 @@ export const login=async(req,res)=>{
             bio: user.bio,
             followers: user.followers,
             following: user.following,
-            posts: user.posts
+            posts: populatedPosts
         }
-        // console.log(user)
         const isMatch=await bcrypt.compare(password,user.password);
         if(!isMatch){
             return res.status(400).json({message:"Invalid email or password",

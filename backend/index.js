@@ -7,6 +7,7 @@ import connectDB from "./utils/db.js";
 import userRoutes from "./routes/user.routes.js";
 import mongoose from "mongoose";
 import postRoutes from "./routes/post.routes.js";
+import messageRoutes from "./routes/message.routes.js";
 dotenv.config();
 
 
@@ -25,12 +26,13 @@ app.use(cors(corsOptions));
 
 app.use("/api/v1/user",userRoutes);
 app.use("/api/v1/post",postRoutes);
+app.use("/api/v1/message",messageRoutes);
 
 
 connectDB();
 app.listen(PORT,async()=>{
 
     console.log(`Server is running on port ${PORT}`);
-    // console.log("Registered Models:", mongoose.modelNames());  
+    console.log("Registered Models:", mongoose.modelNames());  
 
 })

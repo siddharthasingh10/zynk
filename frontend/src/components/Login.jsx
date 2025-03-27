@@ -12,7 +12,7 @@ const Login = () => {
         password: ""
     });
     const [loading, setLoading] = useState(false);
-   
+   const navigate=useNavigate();
 
     const changeEventHandler = (e) => {
         setInput({ ...input, [e.target.name]: e.target.value });
@@ -29,7 +29,7 @@ const Login = () => {
                 withCredentials: true
             });
             if (res.data.success) {
-             
+             navigate('/');
                 toast.success(res.data.message);
                 setInput({
                     email: "",
@@ -49,7 +49,7 @@ const Login = () => {
         <div className='flex items-center w-screen h-screen justify-center'>
             <form onSubmit={signupHandler} className='shadow-lg flex flex-col gap-5 p-8'>
                 <div className='my-4'>
-                    <h1 className='text-center font-bold text-xl'>LOGO</h1>
+                    <h1 className='text-center font-bold text-xl'>ZYNK</h1>
                     <p className='text-sm text-center'>Login to see photos & videos from your friends</p>
                 </div>
                 <div>
@@ -83,7 +83,7 @@ const Login = () => {
                     )
                 }
 
-                <span className='text-center'>Dosent have an account? <Link to="/signup" className='text-blue-600'>Signup</Link></span>
+                <span className='text-center'>Don't have an account? <Link to="/signup" className='text-blue-600'>Signup</Link></span>
             </form>
         </div>
     )

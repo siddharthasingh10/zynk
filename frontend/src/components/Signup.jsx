@@ -4,6 +4,9 @@ import { Button } from '../components/ui/button'
 import { useState } from 'react'
 import axios from 'axios'
 import {toast} from 'sonner'
+import {Link} from 'react-router-dom'
+import { Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Signup = () => {
     const [input,setInput]=useState({
@@ -12,7 +15,7 @@ const Signup = () => {
         password:''
     })
     const [loading,setLoading]=useState(false)
-
+    const navigate=useNavigate();
     const  changeEventHandler=async(e)=>{
         setInput({...input,[e.target.name]:e.target.value})
     }
@@ -24,7 +27,7 @@ const Signup = () => {
           console.log(input);
       
           const res = await axios.post(
-            'http://localhost:5000/api/v1/user/register', // ✅ Corrected API URL
+            'http://localhost:5000/api/v1/user/register', 
             input,
             {
               headers: {
@@ -35,6 +38,7 @@ const Signup = () => {
           );
       
           if (res.data?.success) {
+            navigate('/');
             toast.success(res.data.message);
             setInput({
                 username:'',
@@ -45,8 +49,7 @@ const Signup = () => {
           }
         } catch (error) {
           console.error("Signup error:", error);
-      
-          // Handle different error cases properly
+     
           toast.error(error.response?.data?.message || "Signup failed. Please try again.");
         }finally{
             setLoading(false)
@@ -95,8 +98,17 @@ const Signup = () => {
                         className="focus-visible:ring-transparent my-2"
                     />
                 </div>
-                <Button type='submit' >Create</Button>
-                {/* <span className='text-center'>Already have an account? <Link to="/login" className='text-blue-600'>Login</Link></span> */}
+                {
+                                    loading ? (
+                                        <Button>
+                                            <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                                            Please wait
+                                        </Button>
+                                    ) : (
+                                        <Button type='submit'>Signup</Button>
+                                    )
+                                }
+                <span className='text-center'>Already have an account? <Link to="/login" className='text-blue-600'>Login</Link></span>
             </form>
         </div>
 

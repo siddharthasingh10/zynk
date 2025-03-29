@@ -3,7 +3,7 @@ import Post from './Post'
 
 function Posts() {
   return (
-    <div>
+    <div className=''>
         {
             [1,2,3].map((item,index)=>{
                 return(

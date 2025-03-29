@@ -6,7 +6,7 @@ function Mainlayout() {
     return (
         <div>
         <LeftSidebar/>
-            <div>
+            <div >
                 <Outlet />
             </div>
         </div>

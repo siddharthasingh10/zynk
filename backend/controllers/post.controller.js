@@ -35,7 +35,8 @@ export const createPost=async(req,res)=>{
         await  post.populate({path:'author'});
         return res.status(201).json({
             post:post,
-            success:true
+            success:true,
+            message:'New Post Added'
         });
     } catch (error) {
         console.log(error);
@@ -50,9 +51,9 @@ export const createPost=async(req,res)=>{
 export const getAllPosts=async(req,res)=>{
     try {
         const posts=await Post.find().sort({createdAt:-1})
-        .populate({path:'author',select:'username,proflePicture'})
+        .populate({path:'author',select:'username proflePicture'})
       
-        .populate({path:'comments',options:{sort:{createdAt:-1}},populate:{path:'author',select:'username,profilePicture'}});
+        .populate({path:'comments',options:{sort:{createdAt:-1}},populate:{path:'author',select:'username profilePicture'}});
         return res.status(200).json({
             posts:posts,
             success:true
@@ -71,8 +72,8 @@ export const getAllPosts=async(req,res)=>{
 export const getUserPosts=async(req,res)=>{
     try {
       const authorId=req.id;
-      const user=await Post.find({author:authorId}).sort({createdAt:-1}).populate({path:'author',select:'username,profilePicture'})
-      .populate({path:'comments',options:{sort:{createdAt:-1}},populate:{path:'author',select:'username,profilePicture'}});
+      const user=await Post.find({author:authorId}).sort({createdAt:-1}).populate({path:'author',select:'username profilePicture'})
+      .populate({path:'comments',options:{sort:{createdAt:-1}},populate:{path:'author',select:'username profilePicture'}});
 
         return res.status(200).json({
             posts:user,
@@ -147,11 +148,14 @@ export const unlikePost=async(req,res)=>{
     }
 }
 
-export const addComments=async(req,res)=>{
+export const    addComments=async(req,res)=>{
     try {
+                   
+        
         const userId=req.id;
         const postId=req.params.id;
         const post=await Post.findById(postId);
+
         if(!post){
             return res.status(404).json({
                 message:"Post not found",
@@ -169,10 +173,12 @@ export const addComments=async(req,res)=>{
             text:content,
             author:userId,
             post:postId
-        }).populate({path:'author',select:'username,profilePicture'});
+        });
+        await comment.populate({path:'author',select:'username profilePicture'});
         post.comments.push(comment._id);
         post.save();
         return res.status(201).json({
+            message:'Comment added',
             comment:comment,
             success:true});
 
@@ -190,7 +196,7 @@ export const addComments=async(req,res)=>{
 export const getCommentsOfPost=async(req,res)=>{
     try {
         const postId=req.params.id;
-        const comments=await Comment.find({post:postId}).sort({createdAt:-1}.populate({path:'author',select:'username,profilePicture'}));
+        const comments=await Comment.find({post:postId}).sort({createdAt:-1}.populate({path:'author',select:'username profilePicture'}));
         if(!comments){
             return res.status(404).json({
                 message:"Comments not found",
@@ -229,7 +235,7 @@ export const deletePost=async(req,res)=>{
                 success:false
             });
         }
-        await post.findByIdAndDelete(postId );
+        await Post.findByIdAndDelete(postId );
         const user=await User.findById(userId);
         if(user){
             user.posts.pull(postId);

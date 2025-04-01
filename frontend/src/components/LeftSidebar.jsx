@@ -1,5 +1,5 @@
 import { Heart, Home, LogOut, MessageCircle, PlusSquare, Search, TrendingUp } from 'lucide-react'
-import React from 'react'
+import React, { useState } from 'react'
 import {
     Avatar,
     AvatarFallback,
@@ -8,8 +8,19 @@ import {
 import axios from 'axios'
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux';
+import { setAuthUser } from '../redux/authSlice';
+import Createpost from './Createpost';
+import { setPost, setSelectedPost } from '../redux/postSlice';
 
 
+
+function LeftSidebar() {
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const {user}=useSelector((state)=>state.auth);
+    const [openPost,setOpenPost]=useState(false)
+    
 const siderBarItems = [
     { icon: <Home />, text: "Home" },
     { icon: <Search />, text: "Search" },
@@ -19,28 +30,28 @@ const siderBarItems = [
     { icon: <TrendingUp />, text: "Explore" },
     {
         icon: <Avatar className="w-7 h-7">
-            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+            <AvatarImage src={user?.profilePicture} alt="@shadcn" />
             <AvatarFallback>CN</AvatarFallback>
         </Avatar>, text: "Profile"
     },
     { icon: <LogOut />, text: "Logout" }
 
 ]
-
-function LeftSidebar() {
-    const navigate = useNavigate();
-
     const logoutHandler = async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/v1/user/logout', {
                 withCredentials: true
             })
             if (response.data.success) {
+                dispatch(setSelectedPost(null))
+                dispatch(setAuthUser(null))
+                dispatch(setPost([]));
                 navigate('/login')
                 toast.success(response.data.message)
             }
 
         } catch (error) {
+            console.log(error)
             toast.error(error.response.data.message)
         }
     }
@@ -57,7 +68,7 @@ function LeftSidebar() {
         } else if (item.text === "Notifications") {
             navigate('/notifications')
         } else if (item.text === "Create") {
-            navigate('/create')
+            setOpenPost(true);
         } else if (item.text === "Explore") {
             navigate('/explore')
         } else if (item.text === "Profile") {
@@ -86,7 +97,7 @@ function LeftSidebar() {
                         )}
                 </div>
             </div>
-
+                <Createpost openPost={openPost} setOpenPost={setOpenPost}/>
         </div>
     )
 }

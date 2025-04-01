@@ -7,14 +7,14 @@ import { getAllPosts,createPost,getUserPosts,getCommentsOfPost,likePost,unlikePo
 
 const router = express.Router();
 
-router.post("/addpost",userAuth,createPost);
+router.post("/addpost",userAuth, upload.single('image'),createPost);
 router.get("/getallposts",userAuth,getAllPosts);
 router.get("/userpost/all",userAuth,getUserPosts);
 
-router.get(":id/like",userAuth,likePost);
-router.get(":id/unlike",userAuth,unlikePost);
-router.get(":id/comment",userAuth,addComments);
+router.get("/:id/like",userAuth,likePost);
+router.get("/:id/dislike",userAuth,unlikePost);
+router.post("/:id/comment",userAuth,addComments);
 router.get("/:id/comment/all",userAuth,getCommentsOfPost);
-router.post("/:id/delete",userAuth,deletePost);
+router.delete("/:id/delete",userAuth,deletePost);
 router.post("/:id/bookmark",userAuth,bookmarkPost);
 export default router;

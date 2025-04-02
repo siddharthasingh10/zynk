@@ -83,13 +83,19 @@ function Createpost({ openPost, setOpenPost }) {
                     placeholder="Write a caption..."
                     rows={1}
                 />
+              
                 {
-                    imagePreview && (
-                        <div>
-                            <img src={imagePreview} alt='preview' />
-                        </div>
-                    )
-                }
+  imagePreview && (
+    <div className="w-full h-48 flex items-center justify-center overflow-hidden rounded-lg">
+      <img 
+        src={imagePreview} 
+        alt="preview" 
+        className="max-w-full max-h-full object-contain"
+      />
+    </div>
+  )
+}
+
                 <input ref={inputRef} type='file' className='hidden' onChange={fileChangeHandler} />
                 <Button onClick={() => inputRef.current.click()}
                     className='w-fit mx-auto bg-[#0095F6] hover:bg-[#258bcf] cursor-pointer'>Select from your computer</Button>

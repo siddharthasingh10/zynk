@@ -72,7 +72,7 @@ const siderBarItems = [
         } else if (item.text === "Explore") {
             navigate('/explore')
         } else if (item.text === "Profile") {
-            navigate('/profile')
+            navigate(`/profile/${user._id}`)
         }
     }
 

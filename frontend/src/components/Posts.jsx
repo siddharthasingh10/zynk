@@ -4,8 +4,9 @@ import { useSelector } from 'react-redux'
 
 function Posts() {
   const {posts}=useSelector(store=>store.post)
+
   return (
-    <div className=''>
+    <div className='p-3 bg-gray-10 my-3'>
         {
             posts.map((post)=>{
                 return(

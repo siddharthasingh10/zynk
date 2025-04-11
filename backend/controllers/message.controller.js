@@ -127,7 +127,7 @@ export const sendMessage = async (req, res) => {
 export const getMessage = async (req, res) => {
   try {
     const senderId = req.id;
-    const receiverId = req.params.id;
+    const receiverId = req.params.id;        
 
     const conversation = await Conversation.findOne({
       participants: { $all: [senderId, receiverId] },

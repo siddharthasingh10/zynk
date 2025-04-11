@@ -125,7 +125,13 @@ export const getUser = async (req, res) => {
         const userId = req.params.id;
 
         const user = await User.findById(userId)
-            .populate({ path: 'posts', options: { sort: { createdAt: -1 } } }) 
+            .populate({ 
+                path: 'posts', 
+                options: { sort: { createdAt: -1 } }, 
+                populate: { path: 'author', select: 'username profilePicture' } // Populate author inside posts
+              })
+              
+            
             .populate({ path: 'bookmarks', options: { sort: { createdAt: -1 } } });
 
         if (!user) {

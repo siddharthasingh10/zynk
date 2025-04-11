@@ -28,8 +28,9 @@ const siderBarItems = [
     { icon: <Heart />, text: "Notifications" },
     { icon: <PlusSquare />, text: "Create" },
     { icon: <TrendingUp />, text: "Explore" },
+    
     {
-        icon: <Avatar className="w-7 h-7">
+        icon: <Avatar className="w-7 h-7 object-cover">
             <AvatarImage src={user?.profilePicture} alt="@shadcn" />
             <AvatarFallback>CN</AvatarFallback>
         </Avatar>, text: "Profile"
@@ -64,7 +65,7 @@ const siderBarItems = [
         } else if (item.text === "Search") {
             navigate('/search')
         } else if (item.text === "Messages") {
-            navigate('/messages')
+            navigate('/chat')
         } else if (item.text === "Notifications") {
             navigate('/notifications')
         } else if (item.text === "Create") {
@@ -78,28 +79,34 @@ const siderBarItems = [
 
 
 
-    return (
-        <div className='fixed top-0 left-0 h-screen w-[16%] px-4 border-r-1 z-10 border-gray-300 bg-gray-100'>
-            <div className='flex flex-col'>
-                <h1 className='my-8 pl-8 font-bold text-xl text-indigo-500'>ZYNK</h1>
-                <div>
+ 
 
+
+    return (
+        <div className='fixed top-0 left-0 h-screen w-16 md:w-[16%] px-2 md:px-4 border-r border-gray-300 bg-gray-100 z-10'>
+            <div className='flex flex-col items-center md:items-start'>
+                <h1 className='my-8 font-bold text-xl text-indigo-500 hidden md:block pl-2'>ZYNK</h1>
+                <div className='flex flex-col gap-2 w-full'>
                     {
                         siderBarItems.map((item, index) => {
                             return (
-                                <div onClick={()=>sidebarHandler(item)} key={index} className='flex items-center gap-4 p-3 relative hover:bg-gray-200 rounded-md cursor-pointer'>
-                                    {item.icon}
-                                    <span>{item.text}</span>
+                                <div
+                                    onClick={() => sidebarHandler(item)}
+                                    key={index}
+                                    className='flex items-center gap-4 p-3 hover:bg-gray-200 rounded-md cursor-pointer w-full'
+                                >
+                                    <div className="min-w-[24px]">{item.icon}</div>
+                                    <span className='hidden md:inline'>{item.text}</span>
                                 </div>
                             )
-                        }
-
-                        )}
+                        })
+                    }
                 </div>
             </div>
-                <Createpost openPost={openPost} setOpenPost={setOpenPost}/>
+            <Createpost openPost={openPost} setOpenPost={setOpenPost} />
         </div>
     )
+    
 }
 
 export default LeftSidebar

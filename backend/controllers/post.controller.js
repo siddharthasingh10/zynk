@@ -3,6 +3,7 @@ import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
 import cloudinary from "../utils/cloudinary.js";
 import { Comment } from "../models/comment.model.js";
+import { getReceiverSocketId, io } from "../socket/socket.js";
 
 export const createPost = async (req, res) => {
     try {
@@ -52,7 +53,7 @@ export const getAllPosts = async (req, res) => {
     try {
         const posts = await Post.find().sort({ createdAt: -1 })
             .populate({ path: 'author', select: 'username profilePicture' }).populate({ path: 'comments', options: { sort: { createdAt: -1 } }, populate: { path: 'author' } });
-        return res.status(200).json({   
+        return res.status(200).json({
             posts: posts,
             success: true
         });
@@ -91,7 +92,7 @@ export const getUserPosts = async (req, res) => {
 export const likePost = async (req, res) => {
     try {
         const postId = req.params.id;
-        const userId = req.id;
+        const userId = req.id; 
         const post = await Post.findById(postId);
         if (!post) {
             return res.status(404).json({
@@ -104,6 +105,23 @@ export const likePost = async (req, res) => {
                 { likes: userId }
         })
         post.save();
+        //notifications
+        const user= await User.findById(userId).select('username profilePicture');
+        const authorId=post.author.toString();
+        if(authorId!==userId){
+            const notification ={
+                    type:'like',
+                userId,
+                userDetails:user,
+                postId,
+                message:`${user.username} liked your post`,
+
+            }
+            const authorSocketId=getReceiverSocketId(authorId);
+            io.to(authorSocketId).emit('notification',notification);
+        }
+
+
         return res.status(200).json({
             message: "Post liked",
             success: true
@@ -133,6 +151,21 @@ export const unlikePost = async (req, res) => {
         }
         await post.updateOne({ $pull: { likes: userId } });
         post.save();
+        //notifications
+        const user= await User.findById(userId).select('username profilePicture');
+        const authorId=post.author.toString();
+        if(authorId!==userId){
+            const notification ={
+                    type:'dislike',
+                userId,
+                userDetails:user,
+                postId,
+                message:`${user.username} disliked your post`,
+
+            }
+            const authorSocketId=getReceiverSocketId(authorId);
+            io.to(authorSocketId).emit('notification',notification);
+        }
         return res.status(200).json({
             message: "Post unliked",
             success: true
@@ -160,7 +193,7 @@ export const addComments = async (req, res) => {
                 message: "Post not found",
                 success: false
             });
-        }
+        } 
         const { content } = req.body;
         if (!content) {
             return res.status(400).json({

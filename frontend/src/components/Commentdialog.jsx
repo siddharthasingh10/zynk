@@ -12,7 +12,8 @@ import axios from "axios";
 function CommentDialog({ openComment, setOpenComment }) {
   const [text, setText] = useState("");
   const { selectedPost, posts } = useSelector(store => store.post);
-const [comment,setComment]=useState();
+ 
+const [comment,setComment]=useState(selectedPost?.comments || []);
 
   const dispatch = useDispatch();
   useEffect(() => {
@@ -78,7 +79,7 @@ const [comment,setComment]=useState();
             <div className="flex items-center justify-between p-4 border-b">
               <div className="flex gap-3 items-center">
                 <Avatar>
-                  <AvatarImage src={selectedPost?.author?.profilePicture} />
+                  <AvatarImage src={selectedPost?.author?.profilePicture } />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
                 <div>

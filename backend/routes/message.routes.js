@@ -8,4 +8,4 @@ const router = express.Router();
 router.route('/send/:id').post(userAuth, sendMessage);
 router.route('/all/:id').get(userAuth, getMessage);
  
-export default router;
+export default router; 

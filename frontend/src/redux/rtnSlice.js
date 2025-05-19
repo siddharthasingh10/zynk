@@ -5,7 +5,7 @@ const rtnSlice = createSlice({
     initialState:{
         likeNotification:[], // [1,2,3]
     },
-    reducers:{
+    reducers:   {
         // setLikeNotification:(state,action)=>{
         //     if(action.payload.type === 'like'){
         //         state.likeNotification.push(action.payload);
@@ -26,9 +26,11 @@ setLikeNotification: (state, action) => {
           )
       );
     }
-  }
+  },
+ 
+}
   
     }
-});
-export const {setLikeNotification} = rtnSlice.actions;
+);
+export const {setLikeNotification,markNotificationsAsRead} = rtnSlice.actions;
 export default rtnSlice.reducer;

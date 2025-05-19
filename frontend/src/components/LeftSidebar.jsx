@@ -181,6 +181,7 @@ import {
   import Createpost from "./Createpost";
   import { setPost, setSelectedPost } from "../redux/postSlice";
   import { Button } from "./ui/button";
+  import {markNotificationsAsRead} from "../redux/rtnSlice";
   
   function LeftSidebar() {
     const navigate = useNavigate();
@@ -287,7 +288,7 @@ import {
   
                 {item.text === "Notifications" && likeNotification?.length > 0 && (
                   <>
-                    <Button
+                    <Button onClick={()=>{dispatch(markNotificationsAsRead());}}
                       size="icon"
                       className="rounded-full h-5 w-5 bg-red-600 hover:bg-red-600 absolute bottom-6 left-6"
                     >
@@ -339,3 +340,4 @@ import {
   
   export default LeftSidebar;
   
+

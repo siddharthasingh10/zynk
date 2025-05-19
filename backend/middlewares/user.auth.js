@@ -8,7 +8,7 @@ export const userAuth = async (req, res, next) => {
             return res.status(401).json({
                 message: "Unauthorized - No token provided",
                 success: false
-            });
+            });        
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET); 

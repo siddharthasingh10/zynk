@@ -70,7 +70,7 @@ function Createpost({ openPost, setOpenPost }) {
 
                 <div className='flex gap-3 items-center '>
                     <Avatar>
-                        <AvatarImage src={user.profilePicture} alt='avtar' />
+                        <AvatarImage src={user?.profilePicture} alt='avtar' />
                         <AvatarFallback>CN</AvatarFallback>
                     </Avatar>   
                     <div>

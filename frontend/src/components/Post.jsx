@@ -166,12 +166,15 @@ function Post({ post }) {
           <DialogContent className="fixed  inset-0 flex items-center justify-center z-50 ">
             <div className="bg-gray-50 p-6 rounded-xl shadow-xl w-80 relative">
               <div className="flex flex-col gap-3 m-4">
-                <Button
+              {
+                post.author._id!==user?._id && ( <Button
                   variant="otuline"
                   className="w-full cursor-pointer border-gray-400 text-red-600 border hover:bg-gray-200"
                 >
                   Unfollow
-                </Button>
+                </Button>)
+              }
+               
                 <Button
                   onClick={deletePostHandler}
                   variant="otuline"
@@ -180,7 +183,7 @@ function Post({ post }) {
                   Delete
                 </Button>
 
-                <Button
+                <Button onClick={bookmarkHandler}
                   variant="outline"
                   className="w-full cursor-pointer border-gray-400 hover:bg-gray-200"
                 >

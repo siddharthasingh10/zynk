@@ -1,3 +1,4 @@
+import axios from "axios";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge"
 
@@ -24,3 +25,20 @@ export const readFileAsDataURL = (file) => {
     reader.readAsDataURL(file);
   });
 };
+
+export const unfollowHandler=async()=>{
+  try {
+    const  res=await axios.post(`http://localhost:5000/api/v1/user/unfollow/${userId}`,{
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      withCredentials: true
+    });
+    if (res.data.success) {
+      dispatch(setUser(res.data.user));
+    
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
